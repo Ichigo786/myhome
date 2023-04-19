@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Vendors</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                    <tr>
+                        <td>{{ vendor.id }}</td>
+                        <td>{{ vendor.name }}</td>
+                        <td>{{ vendor.email }}</td>
+                        <td>{{ vendor.phone }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

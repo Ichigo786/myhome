@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>User Dashboard</title>
+</head>
+<body>
+	<h1>Welcome, {{ user.username }}!</h1>
+	<h2>My Homes</h2>
+	{% if homes %}
+		<table>
+			<tr>
+				<th>Address</th>
+				<th>Construction Type</th>
+				<th>Bedrooms</th>
+				<th>Bathrooms</th>
+				<th>Floor Space</th>
+				<th>Floors</th>
+				<th>Heating Time</th>
+				<th>Roof Type</th>
+				<th>Utility Lines</th>
+			</tr>
+			{% for home in homes %}
+				<tr>
+					<td>{{ home.address }}</td>
+					<td>{{ home.construction_type }}</td>
+					<td>{{ home.bedrooms }}</td>
+					<td>{{ home.bathrooms }}</td>
+					<td>{{ home.floor_space }}</td>
+					<td>{{ home.floors }}</td>
+					<td>{{ home.heating_time }}</td>
+					<td>{{ home.roof_type }}</td>
+					<td>{{ home.utility_lines }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% else %}
+		<p>No homes found.</p>
+	{% endif %}
+	<br>
+	<a href="{{ url_for('add_home', user_id=user.id) }}">Add a home</a>
+</body>
+</html>

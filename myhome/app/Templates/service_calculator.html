@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Service Calculator</title>
+</head>
+<body>
+	<h1>Service Calculator</h1>
+	<form method="POST" action="{{ url_for('calculate_service') }}">
+		<label for="home_id">Select a home:</label>
+		<select name="home_id" id="home_id">
+			{% for home in homes %}
+				<option value="{{ home.id }}">{{ home.address }}</option>
+			{% endfor %}
+		</select>
+		<br><br>
+		<button type="submit">Calculate Service Level</button>
+	</form>
+	{% if service_level %}
+		<p>Service Level: {{ service_level }}</p>
+	{% endif %}
+</body>
+</html>

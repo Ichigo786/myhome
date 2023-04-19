@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block content %}
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const vendorId = "{{ vendor_id }}"; // Add this line
+
+
+  function loadProducts() {
+    fetch('/get_products', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({vendor_id: vendorId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.getElementById("products-table-body");
+        data.products.forEach(product => {
+            const tr = document.createElement("tr");
+            const tdName = document.createElement("td");
+            const tdPrice = document.createElement("td");
+            const tdActions = document.createElement("td");
+            const deleteBtn = document.createElement("button");
+            const modifyBtn = document.createElement("button");
+
+            deleteBtn.textContent = "Delete";
+            deleteBtn.classList.add("btn", "btn-danger", "mr-2");
+            deleteBtn.onclick = function () {
+                tbody.removeChild(tr);
+            };
+
+            modifyBtn.textContent = "Modify";
+            modifyBtn.classList.add("btn", "btn-primary");
+            modifyBtn.onclick = function () {
+                productName.value = tdName.textContent;
+                productPrice.value = tdPrice.textContent;
+                modifyBtn.disabled = true;
+                document.getElementById("submitBtn").textContent = "Update Product";
+                document.getElementById("submitBtn").onclick = function (e) {
+                    e.preventDefault();
+                    tdName.textContent = productName.value;
+                    tdPrice.textContent = productPrice.value;
+                    document.getElementById("submitBtn").textContent = "Upload Product";
+                    document.getElementById("submitBtn").onclick = addProduct;
+                    modifyBtn.disabled = false;
+                    productName.value = "";
+                    productPrice.value = "";
+                };
+            };
+
+            tdName.textContent = product.name;
+            tdPrice.textContent = product.price;
+            tdActions.appendChild(modifyBtn);
+            tdActions.appendChild(deleteBtn);
+
+            tr.appendChild(tdName);
+            tr.appendChild(tdPrice);
+            tr.appendChild(tdActions);
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Call the loadProducts function to fetch the products when the page is loaded
+loadProducts();
+
+
+
+
+function loadServices() {
+    fetch('/get_services', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({vendor_id: vendorId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.getElementById("services-table-body");
+        data.services.forEach(service => {
+            const tr = document.createElement("tr");
+            const tdName = document.createElement("td");
+            const tdDescription = document.createElement("td");
+            const tdActions = document.createElement("td");
+            const deleteBtn = document.createElement("button");
+            const modifyBtn = document.createElement("button");
+
+            deleteBtn.textContent = "Delete";
+            deleteBtn.classList.add("btn", "btn-danger", "mr-2");
+            deleteBtn.onclick = function () {
+                tbody.removeChild(tr);
+            };
+
+            modifyBtn.textContent = "Modify";
+            modifyBtn.classList.add("btn", "btn-primary");
+            modifyBtn.onclick = function () {
+                serviceName.value = tdName.textContent;
+                serviceDescription.value = tdDescription.textContent;
+                modifyBtn.disabled = true;
+                document.getElementById("submitServiceBtn").textContent = "Update Service";
+                document.getElementById("submitServiceBtn").onclick = function (e) {
+                    e.preventDefault();
+                    tdName.textContent = serviceName.value;
+                    tdDescription.textContent = serviceDescription.value;
+                    document.getElementById("submitServiceBtn").textContent = "Add Service";
+                    document.getElementById("submitServiceBtn").onclick = addService;
+                    modifyBtn.disabled = false;
+                    serviceName.value = "";
+                    serviceDescription.value = "";
+                };
+            };
+
+            tdName.textContent = service.name;
+            tdDescription.textContent = service.description;
+            tdActions.appendChild(modifyBtn);
+            tdActions.appendChild(deleteBtn);
+
+            tr.appendChild(tdName);
+            tr.appendChild(tdDescription);
+            tr.appendChild(tdActions);
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Call the loadServices function to fetch the services when the page is loaded
+loadServices();
+
+
+
+
+
+
+        function addProduct(e) {
+            e.preventDefault();
+            const productName = document.getElementById("product_name");
+            const productPrice = document.getElementById("product_price");
+
+            fetch('/add_product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    product_name: productName.value,
+                    product_price: productPrice.value,
+                    vendor_id: vendorId
+                })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Handle the success case, e.g., update the UI
+                    let productList = document.getElementById("product_list");
+                    let newProduct = document.createElement("li");
+                    newProduct.textContent = productName.value + " - $" + productPrice.value;
+                    productList.appendChild(newProduct);
+                } else {
+                    // Handle the error case
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+
+            productName.value = "";
+            productPrice.value = "";
+        }
+
+
+
+        function addService(e) {
+            e.preventDefault();
+            const serviceName = document.getElementById("service_name");
+            const serviceDescription = document.getElementById("service_description");
+
+            if (serviceName.value !== "" && serviceDescription.value !== "") {
+                fetch('/add_service', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        service_name: serviceName.value,
+                        service_description: serviceDescription.value,
+                        vendor_id: vendorId // Add this line
+                    })
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const tbody = document.getElementById("services-table-body");
+                        const tr = document.createElement("tr");
+                        const tdName = document.createElement("td");
+                        const tdDescription = document.createElement("td");
+                        const tdActions = document.createElement("td");
+                        const deleteBtn = document.createElement("button");
+                        const modifyBtn = document.createElement("button");
+
+                        deleteBtn.textContent = "Delete";
+                        deleteBtn.classList.add("btn", "btn-danger", "mr-2");
+                        deleteBtn.onclick = function () {
+                            tbody.removeChild(tr);
+                        };
+
+                        modifyBtn.textContent = "Modify";
+                        modifyBtn.classList.add("btn", "btn-primary");
+                        modifyBtn.onclick = function () {
+                            serviceName.value = tdName.textContent;
+                            serviceDescription.value = tdDescription.textContent;
+                            modifyBtn.disabled = true;
+                            document.getElementById("submitServiceBtn").textContent = "Update Service";
+                            document.getElementById("submitServiceBtn").onclick = function (e) {
+                                e.preventDefault();
+                                tdName.textContent = serviceName.value;
+                                tdDescription.textContent = serviceDescription.value;
+                                document.getElementById("submitServiceBtn").textContent = "Add Service";
+                                document.getElementById("submitServiceBtn").onclick = addService;
+                                modifyBtn.disabled = false;
+                                serviceName.value = "";
+                                serviceDescription.value = "";
+                            };
+                        };
+
+                        tdName.textContent = serviceName.value;
+                        tdDescription.textContent = serviceDescription.value;
+                        tdActions.appendChild(modifyBtn);
+                        tdActions.appendChild(deleteBtn);
+
+                        tr.appendChild(tdName);
+                        tr.appendChild(tdDescription);
+                        tr.appendChild(tdActions);
+                        tbody.appendChild(tr);
+                    } else {
+                        // Handle failure (e.g., show an error message)
+                        //...
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+
+                serviceName.value = "";
+                serviceDescription.value = "";
+            }
+        }
+    </script>
+
+    <div class="container">
+        <h1 class="text-center mt-5">Vendor Dashboard</h1>
+
+        <!-- Upload Product -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        <h2>Upload Product</h2>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="addProduct(event)">
+                            <div class="form-group">
+                                <label for="product_name">Product Name:</label>
+                                <input type="text" id="product_name" name="product_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product_price">Product Price:</label>
+                                <input type="number" step="0.01" id="product_price" name="product_price" class="form-control" required>
+                            </div>
+                            <button type="submit" id="submitBtn" class="btn btn-primary">Upload Product</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        <h2>Uploaded Products</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Product Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                           
+                            <tbody id="products-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Service -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        <h2>Add Service</h2>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="addService(event)">
+                            <div class="form-group">
+                                <label for="service_name">Service Name:</label>
+                                <input type="text" id="service_name" name="service_name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="service_description">Service Description:</label>
+                                <textarea id="service_description" name="service_description" class="form-control" required></textarea>
+                            </div>
+                            <button type="submit" id="submitServiceBtn" class="btn btn-primary">Add Service</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mt-5">
+                    <div class="card-header">
+                        <h2>Added Services</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Service Name</th>
+                                    <th>Service Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="services-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}
